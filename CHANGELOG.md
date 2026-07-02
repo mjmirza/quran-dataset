@@ -2,6 +2,18 @@
 
 All notable changes to this dataset are recorded here. The format follows Keep a Changelog, and the project uses semantic versioning.
 
+## [1.1.0] - 2026-07-02
+
+### Added
+
+- Word by word breakdown on every ayah. each word carries its index, text, a deterministic Buckwalter transliteration, and its letter and character counts.
+- Ayah level Buckwalter transliteration column in the flat JSONL and CSV.
+- Two new validation checks. the word breakdown length equals the word count on every ayah, and the word breakdown rejoins to the exact ayah text.
+
+### Note
+
+- Per word meaning, root, lemma, and grammar are intentionally excluded. those sources are GPL or copyrighted and cannot be relicensed under CC BY 4.0.
+
 ## [1.0.0] - 2026-07-02
 
 ### Added

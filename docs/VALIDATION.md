@@ -1,6 +1,6 @@
 # Validation Report
 
-Generated 2026-07-02T06:15:35Z by `src/validate.py`.
+Generated 2026-07-02T06:30:56Z by `src/validate.py`.
 
 Overall verdict. **PASS**. 6 of 6 layers that ran passed.
 
@@ -44,6 +44,8 @@ Each layer is an independent confirmation, run against a different reference. Th
 
 - [x] per-surah word counts sum from their ayahs
 - [x] per-surah letter counts sum from their ayahs
+- [x] word breakdown length equals word count on every ayah
+- [x] word breakdown rejoins to the exact ayah text (lossless)
 - [x] surah ayah counts sum to 6236
 - [x] corpus word total consistent (77881)
 - [x] corpus letter total consistent (329728)
