@@ -19,6 +19,7 @@ The Arabic text of the Quran is public domain. The value here is the structure a
 - Every one of the 6236 ayahs across all 114 surahs, in the Uthmani script.
 - A normalized shape, corpus then surahs then ayahs, so surah metadata is never repeated on every row.
 - Rich metadata per ayah, the juz, the hizb, the hizb quarter, the manzil, the ruku, the mushaf page, and the sajda marker where one applies.
+- A word by word breakdown for every ayah, each word with its index, its text, a Buckwalter transliteration, and its letter and character counts.
 - Word and letter counts computed for every ayah, every surah, and the whole corpus.
 - Revelation type and revelation order for every surah.
 - A content hash on every ayah, every surah, and the corpus, so you can detect any change instantly.
@@ -78,7 +79,9 @@ The primary file is `data/quran.json`. It is one object, a `dataset` header with
           "verse_key": "1:1",
           "global_number": 1,
           "text": "...",
-          "words": ["...", "..."],
+          "words": [
+            { "index": 1, "text": "...", "buckwalter": "...", "letters": 5, "chars": 9 }
+          ],
           "counts": { "words": 4, "letters": 19 },
           "juz": 1, "hizb": 1, "hizb_quarter": 1, "manzil": 1, "ruku": 1, "page": 1,
           "sajda": null,
@@ -91,6 +94,15 @@ The primary file is `data/quran.json`. It is one object, a `dataset` header with
 ```
 
 For flat workflows, `data/quran.jsonl` has one ayah per line, and `data/quran.csv` has the same rows as a spreadsheet.
+
+## Word by word
+
+Every ayah carries a `words` array. Each entry is one Arabic word with its position, its text, a Buckwalter transliteration, and its letter and character counts. The breakdown is a lossless split of the ayah, so rejoining the words reproduces the verse exactly, and the validator checks this on all 6236 ayahs.
+
+Buckwalter is the standard lossless ASCII scheme used across Quran language work. It is generated here from the Arabic by a fixed, documented table, so it is deterministic and original to this dataset. It is a phonetic orthographic transliteration, not a meaning.
+
+What the word layer deliberately does not include is per word meaning, root, lemma, or grammar. Those datasets are published under GNU GPL or under their own copyright, so they cannot be relicensed under CC BY 4.0 and are not bundled here. If you need them, fetch them from their own source and join on the verse key and the word index. Keeping them out is what lets this dataset stay cleanly free for everyone.
+
 
 ## A note on counts and the basmala
 

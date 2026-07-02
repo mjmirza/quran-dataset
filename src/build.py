@@ -36,19 +36,83 @@ ARABIC_TEXT = SRC / "tanzil-arabic-uthmani.json"
 METADATA_XML = SRC / "tanzil-quran-data.xml"
 
 DATASET_NAME = "Quran Core Dataset"
-DATASET_VERSION = "1.0.0"
+DATASET_VERSION = "1.1.0"
 DATASET_AUTHOR = "Mirza Iqbal"
 DATASET_LICENSE = "CC BY 4.0"
 SCRIPT = "uthmani"
 
 TATWEEL = "ـ"
-# The opening basmala, exactly as this Tanzil edition stores it, merged into
-# ayah 1 of every surah except At-Tawba (9). Al-Fatiha keeps it as ayah 1.
-BASMALA = "بِسمِ ٱللَّهِ ٱلرَّحمٰنِ ٱلرَّحِيمِ"
 
 
 def sha256(text):
     return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+BUCKWALTER = {
+    "\u0621": "'",
+    "\u0622": "|",
+    "\u0623": ">",
+    "\u0624": "&",
+    "\u0625": "<",
+    "\u0626": "}",
+    "\u0627": "A",
+    "\u0628": "b",
+    "\u0629": "p",
+    "\u062a": "t",
+    "\u062b": "v",
+    "\u062c": "j",
+    "\u062d": "H",
+    "\u062e": "x",
+    "\u062f": "d",
+    "\u0630": "*",
+    "\u0631": "r",
+    "\u0632": "z",
+    "\u0633": "s",
+    "\u0634": "$",
+    "\u0635": "S",
+    "\u0636": "D",
+    "\u0637": "T",
+    "\u0638": "Z",
+    "\u0639": "E",
+    "\u063a": "g",
+    "\u0641": "f",
+    "\u0642": "q",
+    "\u0643": "k",
+    "\u0644": "l",
+    "\u0645": "m",
+    "\u0646": "n",
+    "\u0647": "h",
+    "\u0648": "w",
+    "\u0649": "Y",
+    "\u064a": "y",
+    "\u064b": "F",
+    "\u064c": "N",
+    "\u064d": "K",
+    "\u064e": "a",
+    "\u064f": "u",
+    "\u0650": "i",
+    "\u0651": "~",
+    "\u0652": "o",
+    "\u0670": "`",
+    "\u0671": "{",
+    "\u0653": "^",
+    "\u0654": "#",
+    "\u0655": "=",
+}
+
+
+def buckwalter(text):
+    """Deterministic Buckwalter transliteration. Mapped characters convert 1:1,
+    Quranic annotation signs that carry no letter value are dropped, spaces are
+    kept. Documented, reproducible, original to this dataset. It is a phonetic
+    orthographic transliteration, not a translation."""
+    out = []
+    for c in text:
+        if c.isspace():
+            out.append(" ")
+        elif c in BUCKWALTER:
+            out.append(BUCKWALTER[c])
+    return "".join(out)
 
 
 def count_words(text):
@@ -69,6 +133,23 @@ def count_letters(text):
 
 def word_list(text):
     return [t for t in text.split() if t.strip()]
+
+
+def word_objects(text):
+    """Per-word breakdown. index, the word text, its Buckwalter transliteration,
+    and its letter and character counts. All computed from the text."""
+    out = []
+    for i, w in enumerate(word_list(text), start=1):
+        out.append(
+            {
+                "index": i,
+                "text": w,
+                "buckwalter": buckwalter(w),
+                "letters": count_letters(w),
+                "chars": len(w),
+            }
+        )
+    return out
 
 
 def parse_metadata(xml_path):
@@ -183,7 +264,7 @@ def main():
                     "verse_key": key,
                     "global_number": ordinal[(sidx, aya)],
                     "text": text,
-                    "words": word_list(text),
+                    "words": word_objects(text),
                     "counts": {"words": wc, "letters": lc},
                     "juz": juz_of[(sidx, aya)],
                     "hizb": (q - 1) // 4 + 1,
@@ -310,6 +391,7 @@ def main():
                     "ayah": a["number"],
                     "global_number": a["global_number"],
                     "text": a["text"],
+                    "buckwalter": buckwalter(a["text"]),
                     "words": a["counts"]["words"],
                     "letters": a["counts"]["letters"],
                     "juz": a["juz"],

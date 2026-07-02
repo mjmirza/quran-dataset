@@ -299,12 +299,24 @@ def main():
     )
     concat = "\n".join(a["text"] for s in surahs for a in s["ayahs"])
     hash_ok = sha256(concat) == dataset["dataset"]["content_hash"]
+    # word layer integrity. the per-word breakdown must be a lossless split of
+    # the ayah text, and the word list length must equal the word count.
+    word_count_ok = all(len(a["words"]) == a["counts"]["words"] for _, a in all_ayahs)
+    word_lossless_ok = all(
+        " ".join(w["text"] for w in a["words"]) == " ".join(a["text"].split())
+        for _, a in all_ayahs
+    )
     rep.layer(
         6,
         "Derived-metric self-consistency",
         [
             ("per-surah word counts sum from their ayahs", surah_words_ok),
             ("per-surah letter counts sum from their ayahs", surah_letters_ok),
+            ("word breakdown length equals word count on every ayah", word_count_ok),
+            (
+                "word breakdown rejoins to the exact ayah text (lossless)",
+                word_lossless_ok,
+            ),
             (
                 "surah ayah counts sum to 6236",
                 sum(len(s["ayahs"]) for s in surahs) == 6236,
@@ -323,8 +335,8 @@ def main():
 
     # write report
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    ran = [l for l in rep.layers if l[2]]
-    passed_layers = sum(1 for l in ran if l[3])
+    ran = [ly for ly in rep.layers if ly[2]]
+    passed_layers = sum(1 for ly in ran if ly[3])
     verdict = "PASS" if rep.ok() else "REVIEW"
     lines = []
     lines.append("# Validation Report")
